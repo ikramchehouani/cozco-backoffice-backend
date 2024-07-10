@@ -1,33 +1,28 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const authRoutes = require('./src/route/authRoutes');
+const articleRoutes = require('./src/route/articleRoutes');
+const commandeRoutes = require('./src/route/commandeRoutes');
 
-const uri = process.env.MONGO_URL;
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-console.log(process.env.MONGO_URL)
-if (!uri) {
-  console.error("MongoDB connection string is not defined in the environment variables");
-  process.exit(1);
-}
+// Middleware
+app.use(express.json());
+app.use(cors());
 
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error(err));
 
-async function run() {
-  try {
-    await client.connect();
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } catch (error) {
-    console.error("Failed to connect to MongoDB", error);
-  } finally {
-    await client.close();
-  }
-}
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api', articleRoutes);
+app.use('/api', commandeRoutes);
 
-run().catch(console.dir);
+// Start server
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

@@ -4,7 +4,9 @@
   "description": "Workshop Cozco",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "nodemon server.js",
+    "load-test": "npx artillery run artillery/src/load-test.yml"
   },
   "repository": {
     "type": "git",
@@ -24,10 +26,12 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.6.2",
     "mongoose": "^8.4.0",
+    "node-watch": "^0.7.4",
     "nodemailer": "^6.9.13"
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "node-mocks-http": "^1.14.1"
+    "node-mocks-http": "^1.14.1",
+    "nodemon": "^3.1.4"
   }
 }

@@ -1,0 +1,185 @@
+config:
+  target: http://localhost:8080/api
+  processor: "./processors/process.js"
+  plugins:
+   publish-metrics:
+      - type: datadog
+        # DD_API_KEY is an environment variable containing the API key
+        apiKey: '{{ $env.DD_API_KEY }}'
+        host: "localhost"
+        service: "my-nodejs-service"
+        env: "development"
+        version: "1.0"
+        prefix: 'artillery.publish_metrics_plugin.'
+        tags:
+          - 'testId:{{ $testId }}'
+          - 'reporterType:datadog-api'
+        event:
+          title: 'Plugin integration test'
+          priority: normal
+          tags:
+            - 'testId:{{ $testId }}'
+        traces:
+          sampleRate: 0.5
+          useRequestNames: true
+          tags:
+            - 'testType:LoadTest'
+  ensure: {}
+  apdex: {}
+  metrics-by-endpoint: {}
+  phases:
+    - duration: 5
+      arrivalRate: 1
+      rampTo: 5
+      name: Warm up phase
+
+    # - duration: 60
+    #   arrivalRate: 5
+    #   rampTo: 10
+    #   name: Ramp up load
+
+    # - duration: 30
+    #   arrivalRate: 10
+    #   rampTo: 30
+    #   name: Spike phase
+    
+apdex:
+  threshold: 100
+ensure:
+  thresholds:
+    - http.response_time.p99: 100
+    - http.response_time.p95: 75
+
+# before:
+#   flow:
+#     - function: "loadArticleData"
+   
+  defaults:
+    headers:
+    Content-Type: "application/json"
+    Authorization: "Bearer {{ token }}"
+
+defaults:
+  headers:
+  Content-Type: "application/json"
+
+scenarios:
+  - name: "COMPLETE INTERACTION"
+    flow:
+      # Connexion et récupération du token
+      - post:
+          url: "/auth/signin"
+          json:
+            email: "aouetchoua@gmail.com"
+            password: "password"
+          afterResponse: "saveTokenAndLogStatus"
+      - think: 2
+
+      # Récupération de tous les articles
+      - get:
+          url: "/articles"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          afterResponse: "getAllCreatedArticles"
+      - think: 2
+
+      # - function: "deleteCreatedArticles"
+      # - think: 2
+
+      # Création d'un nouvel article
+      - post:
+          url: "/articles/article"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            title: "Innovative Title"
+            description: "Detailed description of the article."
+            quantity:
+              - packageType: "16 bouteilles 1L"
+                price: 79.2
+                quantityType: 200
+              - packageType: "32 bouteilles 50cl" 
+                price: 95.2
+                quantityType: 200
+            photo: "https://example.com/photo1.jpg"
+            author: "John Doe"
+          afterResponse: "logArticleCreation"
+      - think: 2
+
+      # Mise à jour d'un article existant
+      - put:
+          url: "/articles/article/{{ createdArticleId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            title: "Updated Innovative Title"
+            description: "Updated description with even more details."
+            quantity:
+              - packageType: "16 bouteilles 1L"
+                price: 79.2
+                quantityType: 300
+              - packageType: "32 bouteilles 50cl"
+                price: 95.2
+                quantityType: 350
+            photo: "https://example.com/photo2.jpg"
+            author: "John Doe"
+          afterResponse: "logArticleUpdate"
+      - think: 2
+
+      # Suppression d'un article
+      - delete:
+          url: "/articles/article/{{ createdArticleId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          afterResponse: "logArticleDeletion"
+      - think: 2
+
+      # Création d'une commande
+      # - post:
+      #     url: "/articles/commandes"
+      #     headers:
+      #       Authorization: "Bearer {{ token }}"
+      #     json:
+      #       userId: "{{ userId }}"
+      #       articleId: "{{ createdArticleId }}"
+      #       quantity: 10
+      #       address: "123 Main St, City, Country"
+      #     afterResponse: "logCommandeCreation"
+      # - think: 2
+
+      # Récupération de toutes les commandes
+      # - get:
+      #     url: "/commandes"
+      #     headers:
+      #       Authorization: "Bearer {{ token }}"
+      #     afterResponse: "getAllCommandes"
+      # - think: 2
+
+      # Création d'un utilisateur
+      # - post:
+      #     url: "/signup"
+      #     json:
+      #       email: "newuser@example.com"
+      #       password: "newpassword"
+      #       name: "New User"
+      #     afterResponse: "logUserSignup"
+      # - think: 2
+
+      # Mise à jour d'un utilisateur
+      # - put:
+      #     url: "/update-user/{{ userId }}"
+      #     headers:
+      #       Authorization: "Bearer {{ token }}"
+      #     json:
+      #       email: "updateduser@example.com"
+      #       name: "Updated User"
+      #     afterResponse: "logUserUpdate"
+      # - think: 2
+
+      # Suppression d'un utilisateur
+      # - delete:
+      #     url: "/delete-user/{{ userId }}"
+      #     headers:
+      #       Authorization: "Bearer {{ token }}"
+      #     afterResponse: "logUserDeletion"
+      # - think: 2

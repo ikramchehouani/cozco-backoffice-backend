@@ -1,5 +1,5 @@
-const Commande = require('../model/commandeModel');
-const Article = require('../model/articleModel');
+const Commande = require('../../model/commandeModel');
+const Article = require('../../model/articleModel');
 const mongoose = require('mongoose');
 
 // Créer une nouvelle commande

@@ -1,5 +1,5 @@
 const authController = require('../controller/authController');
-const User = require('../model/utilisateurModel');
+const User = require('../../model/utilisateurModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const httpMocks = require('node-mocks-http');

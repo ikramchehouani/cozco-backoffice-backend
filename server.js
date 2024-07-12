@@ -1,7 +1,14 @@
+require('dotenv').config();
+
+const tracer = require('dd-trace').init({
+  env: process.env.NODE_ENV || 'dev',
+  service: 'cozco',
+  version: '1.0.0' 
+});
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
 
 const authRoutes = require('./src/route/authRoutes');
 const articleRoutes = require('./src/route/articleRoutes');
